@@ -1,0 +1,13 @@
+yfinance
+pandas
+numpy
+redis
+kafka
+kafka-python
+six
+confluent-kafka
+tensorflow
+scikit-learn
+setuptools
+streamlit
+plotly
