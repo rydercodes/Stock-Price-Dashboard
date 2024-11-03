@@ -11,3 +11,7 @@ scikit-learn
 setuptools
 streamlit
 plotly
+sqlalchemy 
+psycopg2
+dbt-core 
+dbt-postgres

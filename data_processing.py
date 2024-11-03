@@ -1,37 +1,40 @@
 # data_processing.py
 import pandas as pd
+from sqlalchemy import create_engine
 from sklearn.preprocessing import MinMaxScaler
 import numpy as np
 
-def process_batch_data(stock_data):
-    """
-    Add moving average to stock data for trend analysis.
-    """
-    stock_data['Moving_Avg'] = stock_data['Close'].rolling(window=5).mean()
-    return stock_data
+# Database connection
+engine = create_engine("postgresql://username:password@localhost:5432/stock_data")
 
-def prepare_data_for_lstm(stock_data, look_back=60):
+def load_data_from_postgres():
     """
-    Prepare data for LSTM by scaling and creating sequences.
+    Load data from PostgreSQL.
     """
+    query = "SELECT * FROM raw_stock_data"
+    return pd.read_sql(query, engine)
+
+def prepare_data_for_model(data, look_back=60):
+    """
+    Scales and prepares data for the LSTM model.
+    """
+    data = data[['timestamp', 'close', 'ticker']].dropna()
     scaler = MinMaxScaler(feature_range=(0, 1))
-    scaled_data = scaler.fit_transform(stock_data[['Close']])
+    data['scaled_close'] = scaler.fit_transform(data[['close']])
 
-    # Create sequences of look_back time steps
-    X_train, y_train = [], []
-    for i in range(look_back, len(scaled_data)):
-        X_train.append(scaled_data[i-look_back:i, 0])
-        y_train.append(scaled_data[i, 0])
-    X_train, y_train = np.array(X_train), np.array(y_train)
-    
-    # Reshape for LSTM input
-    X_train = np.reshape(X_train, (X_train.shape[0], X_train.shape[1], 1))
-    return X_train, y_train, scaler
+    X, y = [], []
+    for ticker in data['ticker'].unique():
+        ticker_data = data[data['ticker'] == ticker]
+        scaled_data = ticker_data['scaled_close'].values
+        for i in range(look_back, len(scaled_data)):
+            X.append(scaled_data[i-look_back:i])
+            y.append(scaled_data[i])
 
-# Test process function (can be removed in production)
+    X, y = np.array(X), np.array(y)
+    X = np.reshape(X, (X.shape[0], X.shape[1], 1))
+    return X, y, scaler
+
+# Example usage
 if __name__ == "__main__":
-    from data_fetching import fetch_batch_stock_data
-    data = fetch_batch_stock_data("AAPL", period="1y", interval="1h")
-    processed_data = process_batch_data(data)
-    X_train, y_train, scaler = prepare_data_for_lstm(processed_data)
-    print(X_train.shape, y_train.shape)
+    raw_data = load_data_from_postgres()
+    X, y, scaler = prepare_data_for_model(raw_data)

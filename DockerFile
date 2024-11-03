@@ -1,11 +1,19 @@
 # Dockerfile
+
+# Start with a Python base image
 FROM python:3.11
+
+# Set the working directory in the container
 WORKDIR /app
+
+# Copy the project files into the container
 COPY . /app
+
+# Install the dependencies from requirements.txt
 RUN pip install -r requirements.txt
 
-# Expose port 8501 for Streamlit
+# Expose the port that Streamlit will run on (default is 8501)
 EXPOSE 8501
 
 # Run the Streamlit app
-CMD ["streamlit", "run", "dashboard.py", "--server.port=8501"]
+CMD ["streamlit", "run", "dashboard.py", "--server.port=8501", "--server.address=0.0.0.0"]

@@ -1,0 +1,44 @@
+[0m20:38:52.573279 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x106b98f90>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x106bd7a50>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x106bfad50>]}
+
+
+============================== 20:38:52.575513 | d012eb49-68c4-462e-a1da-a88c569f37e6 ==============================
+[0m20:38:52.575513 [info ] [MainThread]: Running with dbt=1.8.8
+[0m20:38:52.575767 [debug] [MainThread]: running dbt with arguments {'printer_width': '80', 'indirect_selection': 'eager', 'write_json': 'True', 'log_cache_events': 'False', 'partial_parse': 'True', 'cache_selected_only': 'False', 'profiles_dir': '/Users/jaber/.dbt', 'version_check': 'True', 'warn_error': 'None', 'log_path': 'logs', 'debug': 'False', 'fail_fast': 'False', 'use_colors': 'True', 'use_experimental_parser': 'False', 'empty': 'None', 'quiet': 'False', 'no_print': 'None', 'log_format': 'default', 'static_parser': 'True', 'introspect': 'True', 'invocation_command': 'dbt init stock_analysis', 'target_path': 'None', 'warn_error_options': 'WarnErrorOptions(include=[], exclude=[])', 'send_anonymous_usage_stats': 'True'}
+[0m20:38:52.581122 [debug] [MainThread]: Starter project path: /Users/jaber/Documents/Github repositories/Stock-Price-Dashboard/.env/lib/python3.11/site-packages/dbt/include/starter_project
+[0m20:38:52.584265 [info ] [MainThread]: 
+Your new dbt project "stock_analysis" was created!
+
+For more information on how to configure the profiles.yml file,
+please consult the dbt documentation here:
+
+  https://docs.getdbt.com/docs/configure-your-profile
+
+One more thing:
+
+Need help? Don't hesitate to reach out to us via GitHub issues or on Slack:
+
+  https://community.getdbt.com/
+
+Happy modeling!
+
+[0m20:38:52.584462 [info ] [MainThread]: Setting up your profile.
+[0m20:40:49.047156 [info ] [MainThread]: Profile stock_analysis written to /Users/jaber/.dbt/profiles.yml using target's profile_template.yml and your supplied values. Run 'dbt debug' to validate the connection.
+[0m20:40:49.057454 [debug] [MainThread]: Resource report: {"command_name": "init", "command_success": true, "command_wall_clock_time": 116.50956, "process_user_time": 0.558223, "process_kernel_time": 0.109667, "process_mem_max_rss": "99450880", "process_in_blocks": "0", "process_out_blocks": "0"}
+[0m20:40:49.058413 [debug] [MainThread]: Command `dbt init` succeeded at 20:40:49.058289 after 116.51 seconds
+[0m20:40:49.058814 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x106bd6f50>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x106bd6390>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x106a69a10>]}
+[0m20:40:49.059210 [debug] [MainThread]: Flushing usage events
+[0m20:46:24.103225 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x108bb8d10>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x108bda110>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x108bd2cd0>]}
+
+
+============================== 20:46:24.105285 | e760661a-eda3-4d37-8aaa-7a4991e41b68 ==============================
+[0m20:46:24.105285 [info ] [MainThread]: Running with dbt=1.8.8
+[0m20:46:24.105541 [debug] [MainThread]: running dbt with arguments {'printer_width': '80', 'indirect_selection': 'eager', 'write_json': 'True', 'log_cache_events': 'False', 'partial_parse': 'True', 'cache_selected_only': 'False', 'profiles_dir': '/Users/jaber/.dbt', 'version_check': 'True', 'debug': 'False', 'log_path': 'logs', 'warn_error': 'None', 'fail_fast': 'False', 'use_colors': 'True', 'use_experimental_parser': 'False', 'empty': 'False', 'quiet': 'False', 'no_print': 'None', 'log_format': 'default', 'invocation_command': 'dbt run', 'introspect': 'True', 'static_parser': 'True', 'target_path': 'None', 'warn_error_options': 'WarnErrorOptions(include=[], exclude=[])', 'send_anonymous_usage_stats': 'True'}
+[0m20:46:24.105813 [error] [MainThread]: Encountered an error:
+Runtime Error
+  No dbt_project.yml found at expected path /Users/jaber/Documents/Github repositories/Stock-Price-Dashboard/dbt_project.yml
+  Verify that each entry within packages.yml (and their transitive dependencies) contains a file named dbt_project.yml
+  
+[0m20:46:24.106645 [debug] [MainThread]: Resource report: {"command_name": "run", "command_wall_clock_time": 0.026497332, "process_user_time": 0.433728, "process_kernel_time": 0.073616, "process_mem_max_rss": "94437376", "command_success": false, "process_in_blocks": "0", "process_out_blocks": "0"}
+[0m20:46:24.106864 [debug] [MainThread]: Command `dbt run` failed at 20:46:24.106824 after 0.03 seconds
+[0m20:46:24.107009 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x108bd2f50>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x108bf2ad0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x108bda110>]}
+[0m20:46:24.107142 [debug] [MainThread]: Flushing usage events
