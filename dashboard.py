@@ -1,35 +1,49 @@
+# dashboard.py
 import streamlit as st
-import pandas as pd
-from data_processing import fetch_batch_stock_data, process_batch_data, prepare_data_for_lstm, train_lstm_model
+from data_fetching import fetch_batch_stock_data
+from data_processing import process_batch_data, prepare_data_for_lstm
+from model_training import build_lstm_model, train_lstm_model
+import numpy as np
 
-# Title and description
-st.title("Stock Price Dashboard")
-st.write("This dashboard displays stock prices and predictions.")
+# Streamlit UI components
+st.title("Enhanced Multi-Ticker Stock Price Dashboard")
+st.write("This dashboard shows stock price data, trends, and predictions for multiple stocks.")
 
-# Input for stock symbol
-ticker_symbol = st.text_input("Enter a stock symbol (e.g., AAPL)", value="AAPL")
+# Define a list of 10 stock tickers
+tickers = ["AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "META", "NVDA", "NFLX", "BABA", "INTC"]
 
-# Fetch and display stock data
-if ticker_symbol:
-    # Fetch data for the last month with 1-hour interval
-    stock_data = fetch_batch_stock_data(ticker_symbol, period="1mo", interval="1h")
+# Loop through each ticker to fetch, process, and display data
+for ticker_symbol in tickers:
+    st.header(f"Stock Data for {ticker_symbol}")
     
-    # Display raw data
-    st.subheader(f"Raw Stock Data for {ticker_symbol}")
-    st.write(stock_data.tail(10))  # Show the last 10 rows of data
+    # Fetch stock data for 1 year with a 1-hour interval
+    stock_data = fetch_batch_stock_data(ticker_symbol, period="1y", interval="1h")
     
-    # Process the data (e.g., moving average)
+    # Display raw data table
+    st.subheader(f"Raw Data for {ticker_symbol}")
+    st.write(stock_data.tail())
+
+    # Process the data (add moving average)
     processed_data = process_batch_data(stock_data)
     
-    # Display processed data with moving average
-    st.subheader("Stock Data with Moving Average")
+    # Display line chart with closing price and moving average
+    st.subheader(f"Closing Price and Moving Average for {ticker_symbol}")
     st.line_chart(processed_data[['Close', 'Moving_Avg']])
     
-    # Prepare data and train model
+    # Prepare data for LSTM and train model
     X_train, y_train, scaler = prepare_data_for_lstm(processed_data)
-    model = train_lstm_model(X_train, y_train)
+    model = build_lstm_model((X_train.shape[1], 1))
+    model = train_lstm_model(model, X_train, y_train)
     
-    # Optionally, make predictions and display them (using dummy data here as example)
-    # This is placeholder code, as the prediction code can vary based on implementation
-    st.subheader("LSTM Model Predictions")
-    st.write("Add prediction results here.")
+    # Prediction example (predicting the next hour's price)
+    last_data = processed_data['Close'][-60:].values.reshape(-1, 1)
+    last_data_scaled = scaler.transform(last_data)
+    X_pred = np.reshape(last_data_scaled, (1, 60, 1))
+    predicted_price = scaler.inverse_transform(model.predict(X_pred))
+    
+    # Display the predicted next price
+    st.subheader(f"Predicted Next Hour Price for {ticker_symbol}")
+    st.write(f"Predicted Price: ${predicted_price[0][0]:.2f}")
+
+    # Add a separator between tickers
+    st.markdown("---")
