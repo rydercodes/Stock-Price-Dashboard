@@ -4,7 +4,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 
 # Database connection
-engine = create_engine("postgresql://jaber:13711992@localhost:5432/stock_data")
+engine = create_engine("postgresql://jaber:13711992@my_postgres:5432/stock_data")
 
 # Function to load transformed data
 def load_transformed_data(ticker_symbol):
