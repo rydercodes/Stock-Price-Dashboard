@@ -58,11 +58,11 @@ The application consists of two main services defined in `docker-compose.yml`:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/stock-price-dashboard.git
+git clone https://github.com/rydercodes/Stock-Price-Dashboard.git
 cd stock-price-dashboard
 ```
 
-**Note**: Replace `https://github.com/yourusername/stock-price-dashboard.git` with the actual URL of your repository.
+**Note**: Replace `https://github.com/rydercodes/Stock-Price-Dashboard.git` with the actual URL of your repository.
 
 ### 2. Build and Start the Docker Containers
 
