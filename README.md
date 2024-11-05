@@ -221,10 +221,8 @@ Contributions are welcome! Please follow these steps:
 2. **Clone Your Fork**
 
    ```bash
-   git clone https://github.com/yourusername/stock-price-dashboard.git
+   git clone https://github.com/rydercodes/Stock-Price-Dashboard.git
    ```
-
-   **Note**: Replace `https://github.com/yourusername/stock-price-dashboard.git` with the actual URL of your repository.
 
 3. **Create a New Branch**
 
