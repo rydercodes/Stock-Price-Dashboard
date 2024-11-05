@@ -3,6 +3,9 @@
 # Start with a Python base image
 FROM python:3.11
 
+# Install PostgreSQL client tools
+RUN apt-get update && apt-get install -y postgresql-client
+
 # Set the working directory in the container
 WORKDIR /app
 
