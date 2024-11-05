@@ -4,7 +4,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 
 # PostgreSQL connection details
-engine = create_engine("postgresql://jaber:13711992@localhost:5432/stock_data")
+engine = create_engine("postgresql://jaber:13711992@db:5432/stock_data")
 
 # List of 10 tickers
 TICKERS = ["AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "META", "NVDA", "NFLX", "BABA", "INTC"]
