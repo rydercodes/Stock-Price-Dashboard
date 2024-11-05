@@ -12,6 +12,6 @@ setuptools
 streamlit
 plotly
 sqlalchemy 
-psycopg2
 dbt-core 
 dbt-postgres
+psycopg2-binary

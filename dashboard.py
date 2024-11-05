@@ -11,12 +11,16 @@ def load_transformed_data(ticker_symbol):
     """
     Load transformed stock data with moving average from PostgreSQL.
     """
+
+
     query = f"""
-    SELECT close, moving_avg
-    FROM moving_average
+    SELECT ticker, close,
+        AVG(close) OVER (PARTITION BY ticker ORDER BY close ROWS BETWEEN 9 PRECEDING AND CURRENT ROW) AS moving_avg
+    FROM raw_stock_data
     WHERE ticker = '{ticker_symbol}'
     ORDER BY close;
     """
+
     return pd.read_sql(query, engine)
 
 # Streamlit dashboard setup

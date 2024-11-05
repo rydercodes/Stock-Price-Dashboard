@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  db:
+    image: postgres
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: jaber
+      POSTGRES_PASSWORD: 13711992
+      POSTGRES_DB: stock_data
+    networks:
+      - stock_network
+    ports:
+      - "5432:5432"
+
+  app:
+    build: .
+    container_name: stock_dashboard
+    environment:
+      - DATABASE_URL=postgresql://jaber:13711992@db:5432/stock_data
+    networks:
+      - stock_network
+    ports:
+      - "8501:8501"
+    depends_on:
+      - db
+
+networks:
+  stock_network:
+    driver: bridge

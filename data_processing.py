@@ -18,7 +18,7 @@ def prepare_data_for_model(data, look_back=60):
     """
     Scales and prepares data for the LSTM model.
     """
-    data = data[['timestamp', 'close', 'ticker']].dropna()
+    data = data[['close', 'ticker']].dropna()  # Removed 'timestamp'
     scaler = MinMaxScaler(feature_range=(0, 1))
     data['scaled_close'] = scaler.fit_transform(data[['close']])
 
@@ -33,6 +33,7 @@ def prepare_data_for_model(data, look_back=60):
     X, y = np.array(X), np.array(y)
     X = np.reshape(X, (X.shape[0], X.shape[1], 1))
     return X, y, scaler
+
 
 # Example usage
 if __name__ == "__main__":
