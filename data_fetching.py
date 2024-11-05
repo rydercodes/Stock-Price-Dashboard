@@ -2,12 +2,39 @@
 import yfinance as yf
 import pandas as pd
 from sqlalchemy import create_engine
+# Add this import at the top of your file
+from sqlalchemy.exc import ProgrammingError
 
 # PostgreSQL connection details
 engine = create_engine("postgresql://jaber:13711992@db:5432/stock_data")
 
 # List of 10 tickers
 TICKERS = ["AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "META", "NVDA", "NFLX", "BABA", "INTC"]
+
+
+
+# Check if the table exists and create it if not
+def create_table_if_not_exists(engine):
+    with engine.connect() as connection:
+        try:
+            # Try querying the table to see if it exists
+            connection.execute("SELECT 1 FROM raw_stock_data LIMIT 1;")
+        except ProgrammingError:
+            # Table does not exist, so create it
+            connection.execute("""
+                CREATE TABLE raw_stock_data (
+                    open DOUBLE PRECISION,
+                    high DOUBLE PRECISION,
+                    low DOUBLE PRECISION,
+                    close DOUBLE PRECISION,
+                    volume BIGINT,
+                    dividends DOUBLE PRECISION,
+                    stock_splits DOUBLE PRECISION,
+                    ticker VARCHAR(10)
+                );
+            """)
+            print("Created table raw_stock_data")
+
 
 def fetch_and_save_data(tickers, period="1y", interval="1h"):
     """
@@ -48,4 +75,5 @@ def fetch_and_save_data(tickers, period="1y", interval="1h"):
 
 # Run the function
 if __name__ == "__main__":
+    create_table_if_not_exists(engine)
     fetch_and_save_data(TICKERS)
