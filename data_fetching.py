@@ -4,7 +4,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 # Add this import at the top of your file
 from sqlalchemy.exc import ProgrammingError
-
+from sqlalchemy import text  # Import text
 # PostgreSQL connection details
 engine = create_engine("postgresql://jaber:13711992@db:5432/stock_data")
 
@@ -17,11 +17,11 @@ TICKERS = ["AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "META", "NVDA", "NFLX", "BAB
 def create_table_if_not_exists(engine):
     with engine.connect() as connection:
         try:
-            # Try querying the table to see if it exists
-            connection.execute("SELECT 1 FROM raw_stock_data LIMIT 1;")
+            # Use text() to execute raw SQL
+            connection.execute(text("SELECT 1 FROM raw_stock_data LIMIT 1;"))
         except ProgrammingError:
             # Table does not exist, so create it
-            connection.execute("""
+            connection.execute(text("""
                 CREATE TABLE raw_stock_data (
                     open DOUBLE PRECISION,
                     high DOUBLE PRECISION,
@@ -32,7 +32,7 @@ def create_table_if_not_exists(engine):
                     stock_splits DOUBLE PRECISION,
                     ticker VARCHAR(10)
                 );
-            """)
+            """))
             print("Created table raw_stock_data")
 
 
