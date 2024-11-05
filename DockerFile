@@ -13,7 +13,7 @@ COPY . /app
 RUN pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --default-timeout=1000 tensorflow==2.18.0
 
 # Install the remaining dependencies using the same mirror
-RUN pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
+RUN pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --default-timeout=1000 -r requirements.txt
 
 # Expose the port for Streamlit
 EXPOSE 8501

@@ -5,7 +5,7 @@ from sklearn.preprocessing import MinMaxScaler
 import numpy as np
 
 # Database connection
-engine = create_engine("postgresql://username:password@db:5432/stock_data")
+engine = create_engine("postgresql://jaber:13711992@db:5432/stock_data")
 
 def load_data_from_postgres():
     """
