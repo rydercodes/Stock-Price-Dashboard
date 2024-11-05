@@ -1,3 +1,5 @@
+# data_fetching.py
+
 import yfinance as yf
 import pandas as pd
 from sqlalchemy import create_engine, text, inspect
@@ -14,6 +16,7 @@ def create_table_if_not_exists(engine):
         with engine.connect() as connection:
             connection.execute(text("""
                 CREATE TABLE raw_stock_data (
+                    datetime TIMESTAMP,
                     open DOUBLE PRECISION,
                     high DOUBLE PRECISION,
                     low DOUBLE PRECISION,
@@ -31,12 +34,25 @@ def create_table_if_not_exists(engine):
 def fetch_and_save_data(tickers, period="1y", interval="1h"):
     """
     Fetches data for each ticker and saves it to PostgreSQL.
+    
+    Parameters:
+        tickers (list): A list of stock ticker symbols.
+        period (str): The period of time to fetch data for (default is "1y" for 1 year).
+        interval (str): The data interval (e.g., "1h" for hourly data).
     """
     for ticker in tickers:
         print(f"Fetching data for {ticker}...")
+        
         # Fetch historical data from Yahoo Finance
         data = yf.Ticker(ticker).history(period=period, interval=interval)
-        # Rename columns to match PostgreSQL table schema
+        
+        # Reset index to make 'Datetime' a column
+        data.reset_index(inplace=True)
+        
+        # Rename 'Datetime' column to 'datetime' to match the database schema
+        data.rename(columns={'Datetime': 'datetime'}, inplace=True)
+        
+        # Rename other columns to match PostgreSQL table schema
         data = data.rename(columns={
             "Open": "open",
             "High": "high",
@@ -46,14 +62,19 @@ def fetch_and_save_data(tickers, period="1y", interval="1h"):
             "Dividends": "dividends",
             "Stock Splits": "stock_splits"
         })
+        
         # Add the ticker column
-        data['ticker'] = ticker
-        # Reorder columns
-        data = data[['open', 'high', 'low', 'close', 'volume', 'dividends', 'stock_splits', 'ticker']]
-        # Save to PostgreSQL
+        data['ticker'] = ticker  # Add ticker column
+        
+        # Reorder columns to match the PostgreSQL table schema
+        data = data[['datetime', 'open', 'high', 'low', 'close', 'volume', 'dividends', 'stock_splits', 'ticker']]
+        
+        # Save to PostgreSQL in the "raw_stock_data" table
         data.to_sql("raw_stock_data", engine, if_exists="append", index=False)
+        
         print(f"Data for {ticker} saved to PostgreSQL.")
 
+# Run the functions
 if __name__ == "__main__":
     print("Starting data_fetching.py")
     create_table_if_not_exists(engine)

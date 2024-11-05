@@ -1,130 +1,253 @@
-# Stock-Price-Dashboard
 
-Real-Time Stock Price Dashboard
-- Data Collection: Use APIs (e.g., Yahoo Finance) to fetch real-time stock data.
-- Data Streaming: Set up a Kafka pipeline to continuously stream stock data.
-- Processing: Use Spark Streaming for real-time transformations.
-- Model Training: Train an LSTM model to predict stock prices.
-- Dashboard: Display results in real-time using Plotly Dash or Streamlit.
-- Deployment: Deploy the dashboard on a cloud service, ensuring data is updated in real time.
+# Stock Price and Moving Average Dashboard
 
+This project is a web-based dashboard that allows users to visualize stock prices and their moving averages for selected stocks. It fetches historical stock data from Yahoo Finance, stores it in a PostgreSQL database, and displays interactive charts using Streamlit. The application is containerized using Docker and orchestrated with Docker Compose.
 
+## Table of Contents
 
+- [Features](#features)
+- [Architecture](#architecture)
+- [Technologies Used](#technologies-used)
+- [Prerequisites](#prerequisites)
+- [Setup and Installation](#setup-and-installation)
+- [Usage](#usage)
+- [Project Structure](#project-structure)
+- [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
+- [License](#license)
 
-1. Data Collection
-Objective: Fetch real-time stock data from an external source (Yahoo Finance, Alpha Vantage, or IEX Cloud).
-Steps:
-Choose an API: Select an API that provides real-time stock prices. Yahoo Finance, for example, offers an API to retrieve stock data with the yfinance Python package.
-API Authentication: Some APIs require an API key (e.g., Alpha Vantage or IEX Cloud), so set up an account and obtain an API key.
-Fetch Data: Use Python code to fetch stock prices at intervals (e.g., every second or minute).
-python
-Copy code
-import yfinance as yf
-ticker = yf.Ticker("AAPL")
-data = ticker.history(period="1d", interval="1m")  # fetch 1-minute interval data
-Store Temporarily: For smoother streaming, consider storing data temporarily in a cache (e.g., Redis) before it flows into Kafka.
+## Features
 
+- **Data Fetching**: Retrieves historical stock data for predefined ticker symbols over the past year at hourly intervals.
+- **Database Storage**: Stores the fetched data in a PostgreSQL database running inside a Docker container.
+- **Data Transformation**: Calculates the moving average of closing prices using SQL window functions.
+- **Interactive Dashboard**: Provides an interactive Streamlit dashboard for visualizing stock prices and moving averages.
+- **Data Table Display**: Displays the underlying data in a table format for detailed analysis.
+- **Dynamic Ticker Selection**: Allows users to select different ticker symbols to update the charts and data.
 
+## Architecture
 
+The application consists of two main services defined in `docker-compose.yml`:
 
-2. Data Streaming with Kafka
-Objective: Stream the collected stock data continuously into a processing pipeline.
-Steps:
-Set Up Kafka: Install Apache Kafka and create a topic (e.g., “stock_prices”) to stream data into.
-Kafka Producer: Write a Python script to act as a Kafka producer that continuously sends the stock data to the “stock_prices” topic.
-python
-Copy code
-from kafka import KafkaProducer
-import json
+1. **Database Service (`db`)**:
+   - Runs a PostgreSQL database inside a Docker container.
+   - Stores stock data in the `raw_stock_data` table.
+2. **Application Service (`app`)**:
+   - Runs the Streamlit application inside a Docker container.
+   - Fetches data using `data_fetching.py` and displays the dashboard via `dashboard.py`.
+   - Waits for the database to be ready before starting the application.
 
-producer = KafkaProducer(bootstrap_servers='localhost:9092', 
-                         value_serializer=lambda v: json.dumps(v).encode('utf-8'))
+## Technologies Used
 
-# Send data to Kafka in a loop
-while True:
-    stock_data = get_stock_data()  # function to fetch data
-    producer.send('stock_prices', value=stock_data)
-Producer Scheduling: Set up the producer to run at a specified interval (e.g., every 5 seconds) to ensure the data stream remains active.
+- **Python 3.11**
+- **Streamlit**: For building the interactive web dashboard.
+- **Pandas**: For data manipulation and analysis.
+- **yfinance**: For fetching historical stock data from Yahoo Finance.
+- **SQLAlchemy**: For database interactions.
+- **PostgreSQL**: For data storage.
+- **Docker & Docker Compose**: For containerization and orchestration.
 
+## Prerequisites
 
-3. Real-Time Data Processing with Spark Streaming
-Objective: Process the incoming stock data to calculate metrics, detect trends, or prepare it for further analysis.
-Steps:
-Configure Spark Streaming: Set up a Spark Streaming job to consume data from the Kafka topic.
-Define Transformations: Perform transformations on the data, such as calculating moving averages, volume-weighted prices, and percent changes.
-Process Data: Use Spark’s DataFrame API for real-time calculations.
-python
-Copy code
-from pyspark.sql import SparkSession
-from pyspark.sql.functions import avg
+- **Docker**: Make sure Docker is installed on your machine.
+- **Docker Compose**: Ensure you have Docker Compose installed.
+- **Git**: Optional, for cloning the repository.
 
-spark = SparkSession.builder.appName("StockStream").getOrCreate()
-df = spark.readStream.format("kafka") \
-     .option("kafka.bootstrap.servers", "localhost:9092") \
-     .option("subscribe", "stock_prices").load()
+## Setup and Installation
 
-# Example transformation: moving average
-processed_df = df.groupBy("ticker").agg(avg("price").alias("moving_avg"))
-Output Processed Data: Output the processed data to another Kafka topic or directly to the dashboard database (e.g., PostgreSQL).
+### 1. Clone the Repository
 
+```bash
+git clone https://github.com/yourusername/stock-price-dashboard.git
+cd stock-price-dashboard
+```
 
+**Note**: Replace `https://github.com/yourusername/stock-price-dashboard.git` with the actual URL of your repository.
 
-4. Model Training with LSTM
-Objective: Train an LSTM (Long Short-Term Memory) model for stock price prediction.
-Steps:
-Historical Data Collection: Gather historical stock data to train the model.
-Data Preprocessing: Scale features and prepare data for time-series modeling (e.g., creating sequences for LSTM input).
-python
-Copy code
-from sklearn.preprocessing import MinMaxScaler
-scaler = MinMaxScaler(feature_range=(0, 1))
-scaled_data = scaler.fit_transform(historical_data)
-Build the LSTM Model: Use TensorFlow or PyTorch to define the LSTM model architecture.
-python
-Copy code
-import tensorflow as tf
+### 2. Build and Start the Docker Containers
 
-model = tf.keras.models.Sequential([
-    tf.keras.layers.LSTM(50, return_sequences=True, input_shape=(timesteps, features)),
-    tf.keras.layers.LSTM(50),
-    tf.keras.layers.Dense(1)
-])
-model.compile(optimizer='adam', loss='mean_squared_error')
-Training: Train the model on historical stock data.
-Save Model: Save the trained model for deployment and integration with real-time data.
+Use Docker Compose to build and run the application:
 
+```bash
+docker-compose up --build
+```
 
+This command will:
 
+- Build the Docker images for both services (`app` and `db`).
+- Start the services defined in `docker-compose.yml`.
 
-5. Dashboard Development with Plotly Dash or Streamlit
-Objective: Create an interactive dashboard that displays stock price predictions and live data visualizations.
-Steps:
-Set Up the Dashboard Framework: Choose either Plotly Dash or Streamlit for rapid dashboard creation.
-Data Visualization: Implement visualizations such as line charts for stock prices, bar charts for volume, and tables for detailed data.
-python
-Copy code
-import streamlit as st
-import plotly.graph_objs as go
+### 3. Wait for the Application to Initialize
 
-fig = go.Figure(go.Scatter(x=times, y=prices, mode='lines', name='Stock Price'))
-st.plotly_chart(fig)
-Real-Time Updates: Use WebSockets or periodic data fetches to ensure the dashboard updates with the latest data.
-User Interface (UI) Enhancements: Add interactive filters, date range selectors, and display widgets for a smoother user experience.
+- The `app` service will:
+  - Wait for the `db` service to be ready.
+  - Run `data_fetching.py` to fetch and store stock data.
+  - Start the Streamlit dashboard.
 
+You can monitor the logs to see the progress:
 
+```bash
+docker-compose logs -f
+```
 
-6. Deployment on Cloud
-Objective: Deploy the entire dashboard application on a cloud platform (e.g., AWS, Google Cloud, or Azure) and ensure scalability.
-Steps:
-Choose a Cloud Platform: Decide on a platform, such as AWS EC2 for the dashboard server, or AWS Lambda for serverless deployment.
-Containerization: Use Docker to containerize the application, making it easier to deploy and scale.
-dockerfile
-Copy code
-# Example Dockerfile
-FROM python:3.8
-WORKDIR /app
-COPY . /app
-RUN pip install -r requirements.txt
-CMD ["python", "app.py"]
-Database Integration: Store processed data in a managed cloud database (e.g., RDS on AWS or Cloud SQL on Google Cloud).
-Monitoring and Scaling: Use cloud-native monitoring tools (e.g., AWS CloudWatch) to monitor performance and set up autoscaling rules to handle increased traffic.
+### 4. Access the Dashboard
+
+Once the containers are running and the initialization is complete, open your web browser and navigate to:
+
+```
+http://localhost:8501
+```
+
+You should see the **Stock Price and Moving Average Dashboard**.
+
+## Usage
+
+### Selecting a Ticker Symbol
+
+- Use the dropdown menu labeled **"Choose a ticker symbol:"** to select a stock (e.g., AAPL, MSFT, GOOGL).
+
+### Viewing the Data Table
+
+- The dashboard displays a data table showing:
+  - `datetime`: The timestamp of each data point.
+  - `close`: The closing price of the stock.
+  - `moving_avg`: The moving average of the closing price over the past 10 periods.
+
+### Interacting with the Chart
+
+- The line chart visualizes the `close` price and `moving_avg` over time.
+- Hover over the chart to see exact values.
+- The chart updates automatically when a different ticker is selected.
+
+### Exploring Different Stocks
+
+- Select different ticker symbols to compare stock performance and trends.
+
+## Project Structure
+
+```
+stock-price-dashboard/
+├── dashboard.py
+├── data_fetching.py
+├── entrypoint.sh
+├── requirements.txt
+├── Dockerfile
+├── docker-compose.yml
+└── README.md
+```
+
+- **dashboard.py**: Contains the Streamlit application code.
+- **data_fetching.py**: Script to fetch stock data and populate the database.
+- **entrypoint.sh**: Entrypoint script for the Docker container; waits for the database and initializes the application.
+- **requirements.txt**: Lists Python dependencies.
+- **Dockerfile**: Defines the Docker image for the `app` service.
+- **docker-compose.yml**: Configures Docker services and networking.
+- **README.md**: Project documentation.
+
+## Troubleshooting
+
+### Common Issues and Solutions
+
+#### 1. `UndefinedTable` Error
+
+- **Problem**: The application cannot find the `raw_stock_data` table.
+- **Solution**: Ensure that `data_fetching.py` runs successfully and populates the database. Check the logs for any errors during data fetching.
+
+#### 2. `psycopg2.errors.UndefinedTable` Exception
+
+- **Problem**: Occurs when the SQL query references a table that doesn't exist.
+- **Solution**: Verify that the table creation in `data_fetching.py` is executed without errors. The `create_table_if_not_exists` function should properly check and create the table.
+
+#### 3. Docker Containers Not Reflecting Code Changes
+
+- **Problem**: Changes made to the code are not visible in the running application.
+- **Solution**: Rebuild the Docker images using the `--build` flag:
+
+  ```bash
+  docker-compose down
+  docker-compose up --build
+  ```
+
+#### 4. `pg_isready: command not found`
+
+- **Problem**: The `pg_isready` command is not available in the Docker container.
+- **Solution**: Ensure that the PostgreSQL client is installed in the `Dockerfile`:
+
+  ```dockerfile
+  RUN apt-get update && apt-get install -y postgresql-client
+  ```
+
+#### 5. Database Connection Issues
+
+- **Problem**: The application cannot connect to the PostgreSQL database.
+- **Solution**: Verify that the connection string in your Python scripts matches the database credentials in `docker-compose.yml`.
+
+### Checking Logs
+
+- **Application Logs**:
+
+  ```bash
+  docker-compose logs app
+  ```
+
+- **Database Logs**:
+
+  ```bash
+  docker-compose logs db
+  ```
+
+### Accessing the Containers
+
+- **App Container**:
+
+  ```bash
+  docker-compose exec app bash
+  ```
+
+- **Database Container**:
+
+  ```bash
+  docker-compose exec db psql -U jaber -d stock_data
+  ```
+
+## Contributing
+
+Contributions are welcome! Please follow these steps:
+
+1. **Fork the Repository**
+
+   Click the "Fork" button at the top right of the repository page.
+
+2. **Clone Your Fork**
+
+   ```bash
+   git clone https://github.com/yourusername/stock-price-dashboard.git
+   ```
+
+   **Note**: Replace `https://github.com/yourusername/stock-price-dashboard.git` with the actual URL of your repository.
+
+3. **Create a New Branch**
+
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+4. **Make Your Changes**
+
+   - Ensure code quality and consistency.
+   - Update documentation if necessary.
+
+5. **Commit and Push**
+
+   ```bash
+   git commit -m "Add your commit message here"
+   git push origin feature/your-feature-name
+   ```
+
+6. **Create a Pull Request**
+
+   Go to your fork on GitHub and click the "Compare & pull request" button.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
